@@ -7,9 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.AbsoluteLayout;
+import android.widget.AbsoluteLayout.LayoutParams;
+import android.util.Log;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -25,8 +30,9 @@ import net.sourceforge.zbar.SymbolSet;
 import net.sourceforge.zbar.Config;
 
 
-
+import org.haxe.lime.HaxeObject;
 import org.haxe.extension.CameraPreview;
+import org.haxe.extension.CameraUtil;
 
 
 /* 
@@ -58,17 +64,110 @@ import org.haxe.extension.CameraPreview;
 public class Zbar extends Extension {
 	
 	
-    private Camera mCamera;
-    private CameraPreview mPreview;
-    private Handler autoFocusHandler;
-    ImageScanner scanner;
-    private boolean barcodeScanned = false;
-    private boolean previewing = true;
+    private static Camera camera;
+    private static Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+    private static CameraPreview preview;
+    private static Handler autoFocusHandler;
+    private static ImageScanner scanner;
+    private static boolean barcodeScanned = false;
+    private static boolean previewing = true;
 
-	public static int sampleMethod (int inputValue) {
-		
-		return inputValue * 100;
-		
+    private static boolean inited = false;
+    private static HaxeObject eventDispatcher;
+
+    private static AbsoluteLayout cameraLayout;
+    private static AbsoluteLayout.LayoutParams cameraLayoutParams;
+    private static View originalContentView;
+
+
+	public static String EVENT_SUCCESS = "success";
+	public static String EVENT_CANCELLED = "cancelled";
+
+	public static void init(HaxeObject eventDispatcher)	{
+		inited = true;
+		Zbar.eventDispatcher = eventDispatcher;
+	}
+
+	public static void startScanning(final int x, final int y, final int width, final int height) {
+		if(inited) {
+			Extension.mainActivity.runOnUiThread(new Runnable() {
+				public void run() {
+					
+					Camera c = getCameraInstance();
+					if(c == null) return;
+					camera = c;
+					int displayOrientation = CameraUtil.getCorrectDisplayOrientation(Extension.mainActivity, cameraInfo);
+		            camera.setDisplayOrientation(displayOrientation);
+
+
+			        Camera.Size size = camera.getParameters().getPreviewSize();
+			        double ratio = (float)size.width / size.height;
+			        int w = width;
+			        int h = height;
+
+			        int rotation = Extension.mainActivity.getWindowManager().getDefaultDisplay().getRotation();
+			        Log.i("z","zbar rotation " + rotation + " displayOrientation " + displayOrientation);
+
+					if(displayOrientation == 0 || displayOrientation == 180) { // at the camera's natural orientation
+						if (width == 0 && height == 0) {
+				        	w = size.width;
+				        	h = size.height;
+			        	}
+			        	else if (w == 0) {
+			        		w = (int) (h * ratio);
+			        	}
+			        	else if (h == 0) {
+			        		h = (int) (w / ratio);
+			        	}
+
+					}
+					else { // at the camera's 90degree-rotated orientation
+						if (width == 0 && height == 0) { 
+				        	h = size.width;
+				        	w = size.height;
+			        	}
+			        	else if (w == 0) {
+			        		w = (int) (h / ratio);
+			        	}
+			        	else if (h == 0) {
+			        		h = (int) (w * ratio);
+			        	}
+
+					}
+			        preview = new CameraPreview(Extension.mainContext, Extension.mainActivity, camera, cameraInfo, previewCallback, autoFocusCallback);
+
+			        // get the current content view
+			        ViewGroup contentView = (ViewGroup) Extension.mainActivity.findViewById(android.R.id.content);
+
+
+			        android.util.Log.i("Z", "zbar " +size.width+ "x" + size.height);
+			        android.util.Log.i("Z", "zbar " +ratio + ":" + w + "x" + h);
+
+	    			cameraLayout = new AbsoluteLayout(Extension.mainContext);
+			        cameraLayoutParams = new AbsoluteLayout.LayoutParams(w,h,x,y);
+			        cameraLayout.addView(preview, cameraLayoutParams);
+					contentView.addView(cameraLayout);
+
+				}
+			});
+/*
+			if (barcodeScanned) {
+	            barcodeScanned = false;
+	            camera.setPreviewCallback(previewCb);
+	            camera.startPreview();
+	            previewing = true;
+	            camera.autoFocus(autoFocusCallback);
+		    }*/
+		}
+	}
+
+	public static void stopScanning() {
+        camera.setPreviewCallback(null);
+        camera.stopPreview();
+        camera.release();
+        camera = null;
+        cameraLayout.removeView(preview);
+        preview.destroy();
 	}
 	
 	
@@ -91,33 +190,17 @@ public class Zbar extends Extension {
 
 		
         autoFocusHandler = new Handler();
-        mCamera = getCameraInstance();
 
         // Instance barcode scanner 
         scanner = new ImageScanner();
         scanner.setConfig(0, Config.X_DENSITY, 3);
         scanner.setConfig(0, Config.Y_DENSITY, 3);
 
-        mPreview = new CameraPreview(Extension.mainContext, mCamera, previewCb, autoFocusCB);
-        //FrameLayout preview = (FrameLayout)findViewById(R.id.cameraPreview);
-        //preview.addView(mPreview);
 
-		((ViewGroup)Extension.mainView.getParent()).removeView(Extension.mainView);
-		//((ViewGroup)Extension.mainView.getParent()).addView(mPreview);
-		Extension.mainActivity.setContentView(mPreview);
+		//((ViewGroup)Extension.mainView.getParent()).removeView(Extension.mainView);
 
-        if (barcodeScanned) {
-            barcodeScanned = false;
-            //scanText.setText("Scanning...");
-            mCamera.setPreviewCallback(previewCb);
-            mCamera.startPreview();
-            previewing = true;
-            mCamera.autoFocus(autoFocusCB);
-        }
-                
-          
-		
-		
+
+
 	}
 	
 	
@@ -187,22 +270,38 @@ public class Zbar extends Extension {
 	}
 
 	/** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
-        Camera c = null;
+    private static Camera getCameraInstance() {
+    	int cameraId = -1;
+		int numberOfCameras = Camera.getNumberOfCameras();
+		for (int i = 0; i < numberOfCameras; i++) {
+  			Camera.getCameraInfo(i, cameraInfo);
+  			if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+    			cameraId = i;
+    			break;
+  			}
+		}
+		Camera c = null;
         try {
-            c = Camera.open();
+            c = Camera.open(cameraId);
         } catch (Exception e){
+
         }
         return c;
     }
-    private Runnable doAutoFocus = new Runnable() {
+
+    private static void dispatchEvent(String type, String contents, String formatName) {
+    	if(inited)
+        	eventDispatcher.call3("dispatch", type, contents, formatName);
+    }
+
+    private static Runnable doAutoFocus = new Runnable() {
             public void run() {
-                //if (previewing)
-                    //mCamera.autoFocus(autoFocusCB);
+                if (previewing)
+                    camera.autoFocus(autoFocusCallback);
             }
         };
 
-    PreviewCallback previewCb = new PreviewCallback() {
+    private static PreviewCallback previewCallback = new PreviewCallback() {
             public void onPreviewFrame(byte[] data, Camera camera) {
                 Camera.Parameters parameters = camera.getParameters();
                 Size size = parameters.getPreviewSize();
@@ -214,12 +313,13 @@ public class Zbar extends Extension {
                 
                 if (result != 0) {
                     previewing = false;
-                    mCamera.setPreviewCallback(null);
-                    mCamera.stopPreview();
-                    
+                    camera.setPreviewCallback(null);
+                    camera.stopPreview();
+
                     SymbolSet syms = scanner.getResults();
                     for (Symbol sym : syms) {
-                        //scanText.setText("barcode result " + sym.getData());
+                    	Log.i("Z", "zbar format " + sym.getType());
+                    	dispatchEvent(EVENT_SUCCESS, sym.getData(), getFormatName(sym.getType()));
                         barcodeScanned = true;
                     }
                 }
@@ -227,11 +327,50 @@ public class Zbar extends Extension {
         };
 
     // Mimic continuous auto-focusing
-    AutoFocusCallback autoFocusCB = new AutoFocusCallback() {
+    private static AutoFocusCallback autoFocusCallback = new AutoFocusCallback() {
             public void onAutoFocus(boolean success, Camera camera) {
                 autoFocusHandler.postDelayed(doAutoFocus, 1000);
             }
         };
 	
+	private static String getFormatName(int type) {
+		String formatName = "";
+
+		switch(type) {
+			/** EAN-8. */
+			case Symbol.EAN8: formatName = "EAN8"; break;
+			/** UPC-E. */
+			case Symbol.UPCE: formatName = "UPCE"; break;
+			/** ISBN-10 (from EAN-13). */
+			case Symbol.ISBN10: formatName = "ISBN10"; break;
+			/** UPC-A. */
+			case Symbol.UPCA: formatName = "UPCA"; break;
+			/** EAN-13. */
+			case Symbol.EAN13: formatName = "EAN13"; break;
+			/** ISBN-13 (from EAN-13). */
+			case Symbol.ISBN13: formatName = "ISBN13"; break;
+			/** Interleaved 2 of 5. */
+			case Symbol.I25: formatName = "I25"; break;
+			/** DataBar (RSS-14). */
+			case Symbol.DATABAR: formatName = "DATABAR"; break;
+			/** DataBar Expanded. */
+			case Symbol.DATABAR_EXP: formatName = "DATABAR_EXP"; break;
+			/** Codabar. */
+			case Symbol.CODABAR: formatName = "CODABAR"; break;
+			/** Code 39. */
+			case Symbol.CODE39: formatName = "CODE39"; break;
+			/** PDF417. */
+			case Symbol.PDF417: formatName = "PDF417"; break;
+			/** QR Code. */
+			case Symbol.QRCODE: formatName = "QRCODE"; break;
+			/** Code 93. */
+			case Symbol.CODE93: formatName = "CODE93"; break;
+			/** Code 128. */
+			case Symbol.CODE128: formatName = "CODE128"; break;
+
+			default: formatName = "NONE";
+		}
+		return formatName;
+	}
 	
 }

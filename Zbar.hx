@@ -7,42 +7,66 @@ import neko.Lib;
 #end
 
 #if (android && openfl)
+import openfl.events.EventDispatcher;
 import openfl.utils.JNI;
 #end
 
 
-class Zbar {
+
+class Zbar extends EventDispatcher
+{
+	private static var instance:Zbar;
+	private static inline var JAVA_CLASS_NAME:String = "org.haxe.extension.Zbar";
+
+	public var scanning(default, null):Bool = false;
 	
-	
-	public static function sampleMethod (inputValue:Int):Int {
+	private function new()
+	{
+		super();
+		zbar_init(this);
+	}
+
+	public static function getInstance():Zbar
+	{
+		if(instance == null)
+			instance = new Zbar();
 		
-		#if (android && openfl)
-		
-		var resultJNI = zbar_sample_method_jni(inputValue);
-		var resultNative = zbar_sample_method(inputValue);
-		
-		if (resultJNI != resultNative) {
-			
-			throw "Fuzzy math!";
-			
+		return instance;
+	}
+
+	public function startScanning(x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0):Void
+	{
+		if(!scanning)
+		{
+			scanning = true;
+			zbar_start_scanning(x, y, width, height);
 		}
-		
-		return resultNative;
-		
-		#else
-		
-		return zbar_sample_method(inputValue);
-		
-		#end
-		
+	}
+
+	public function stopScanning():Void
+	{
+		if(scanning)
+		{
+			scanning = false;
+			zbar_stop_scanning();
+		}
+	}
+
+	private function dispatch(type:String, contents:String, formatName:String)
+	{
+		dispatchEvent(new ScanEvent(type, contents, formatName));
 	}
 	
 	
-	private static var zbar_sample_method = Lib.load ("zbar", "zbar_sample_method", 1);
+	//private static var zbar_sample_method = Lib.load ("zbar", "zbar_sample_method", 1);
 	
 	#if (android && openfl)
-	private static var zbar_sample_method_jni = JNI.createStaticMethod ("org.haxe.extension.Zbar", "sampleMethod", "(I)I");
+	private static var zbar_init = JNI.createStaticMethod (JAVA_CLASS_NAME, "init", "(Lorg/haxe/lime/HaxeObject;)V");
+	private static var zbar_start_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "startScanning", "(IIII)V");
+	private static var zbar_stop_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "stopScanning", "()V");
 	#end
 	
 	
 }
+
+
