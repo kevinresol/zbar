@@ -30,7 +30,7 @@ class Zbar extends EventDispatcher
 	{
 		if(instance == null)
 			instance = new Zbar();
-		
+
 		return instance;
 	}
 
