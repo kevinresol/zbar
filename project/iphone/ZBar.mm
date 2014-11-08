@@ -39,7 +39,7 @@ static NSUInteger ApplicationSupportedInterfaceOrientationsForWindow(id self, SE
 
     // raise an OpenFL event BarcodeScannedEvent.BARCODE_SCANNED
     dispatchEvent("success", [symbol.data UTF8String], [symbol.typeName UTF8String]);
-    
+
     // dismiss with a slight delay to avoid conflicting with the reader view still updating
     [self performSelector:@selector(dismissReader:) withObject:reader afterDelay:1.0f];
 }
@@ -58,7 +58,10 @@ static NSUInteger ApplicationSupportedInterfaceOrientationsForWindow(id self, SE
 {
     // dismiss the controller (NB dismiss from the *reader*!)
     ((ZBarReaderViewController*) reader).readerDelegate = nil;
-    [reader dismissViewControllerAnimated:YES completion:nil];
+    //[reader dismissViewControllerAnimated:YES completion:nil];
+    [reader willMoveToParentViewController:nil];
+	[reader.view removeFromSuperview];
+	[reader removeFromParentViewController];
     [self release];
 }
 @end
@@ -69,6 +72,8 @@ namespace zbar
 
 	namespace iphone 
 	{
+		ZBarReaderViewController * reader;
+
 		void initialize()
         {
             // Ensure we support portrait orientation else UIImagePickerController crashes
@@ -85,9 +90,12 @@ namespace zbar
 		    UIViewController* topViewController = [[UIApplication sharedApplication] keyWindow].rootViewController;
 
 		    // Present a barcode reader that scans from the camera feed
-		    ZBarReaderViewController *reader = [ZBarReaderViewController new];
+		    reader = [ZBarReaderViewController new];
 		    reader.readerDelegate = [[ZBarReaderDelegate alloc] init];
 		    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
+		    reader.showsZBarControls = NO;
+			reader.readerView.frame = CGRectMake(x, y, width, height);
+			reader.view.backgroundColor = [UIColor clearColor];
 
 		    ZBarImageScanner* scanner = reader.scanner;
 		    // TODO: (optional) additional reader configuration here
@@ -97,15 +105,25 @@ namespace zbar
 		             to: 0];
 
 		    // present and release the controller
-		    [topViewController presentViewController:reader animated:YES completion:nil];
+		    [topViewController addChildViewController:reader];
+		    [topViewController.view addSubview:reader.view];
+		    [reader didMoveToParentViewController:topViewController];
+		    //[topViewController presentViewController:reader animated:YES completion:nil];
 		    [reader release];
+
 
 		    //return true;
 		}
 
 		void stopScanning()
 		{
-
+			if(reader)
+			{
+				reader.readerDelegate = nil;
+				[reader willMoveToParentViewController:nil];
+				[reader.view removeFromSuperview];
+				[reader removeFromParentViewController];
+			}
 		}
 	}
 }
