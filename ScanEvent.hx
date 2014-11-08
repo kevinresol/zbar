@@ -32,20 +32,23 @@ class ScanEvent extends Event
 @:enum 
 abstract FormatName(String) from String to String
 {
-	var EAN8 = "EAN8";
-	var UPCE = "UPCE";
-	var ISBN10 = "ISBN10";
-	var UPCA = "UPCA";
-	var EAN13 = "EAN13";
-	var ISBN13 = "ISBN13";
-	var I25 = "I25";
-	var DATABAR = "DATABAR";
-	var DATABAR_EXP = "DATABAR_EXP";
-	var CODABAR = "CODABAR";
-	var CODE39 = "CODE39";
+	var EAN2 = "EAN-2";
+	var EAN5 = "EAN-5";
+	var EAN8 = "EAN-8";
+	var UPCE = "UPC-E";
+	var ISBN10 = "ISBN-10";
+	var UPCA = "UPC-A";
+	var EAN13 = "EAN-13";
+	var ISBN13 = "ISBN-13";
+	var COMPOSITE = "COMPOSITE";
+	var I25 = "I2/5";
+	var DATABAR = "DataBar";
+	var DATABAR_EXP = "DataBar-Exp";
+	var CODABAR = "Codabar";
+	var CODE39 = "CODE-39";
+	var CODE93 = "CODE-93";
+	var CODE128 = "CODE-128";
 	var PDF417 = "PDF417";
-	var QRCODE = "QRCODE";
-	var CODE93 = "CODE93";
-	var CODE128 = "CODE128";
-	var NONE = "NONE";
+	var QRCODE = "QR-Code";
+	var UNKNOWN = "UNKNOWN";
 }

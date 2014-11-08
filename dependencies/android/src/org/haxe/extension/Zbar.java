@@ -338,37 +338,37 @@ public class Zbar extends Extension {
 
 		switch(type) {
 			/** EAN-8. */
-			case Symbol.EAN8: formatName = "EAN8"; break;
+			case Symbol.EAN8: formatName = "EAN-8"; break;
 			/** UPC-E. */
-			case Symbol.UPCE: formatName = "UPCE"; break;
+			case Symbol.UPCE: formatName = "UPC-E"; break;
 			/** ISBN-10 (from EAN-13). */
-			case Symbol.ISBN10: formatName = "ISBN10"; break;
+			case Symbol.ISBN10: formatName = "ISBN-10"; break;
 			/** UPC-A. */
-			case Symbol.UPCA: formatName = "UPCA"; break;
+			case Symbol.UPCA: formatName = "UPC-A"; break;
 			/** EAN-13. */
-			case Symbol.EAN13: formatName = "EAN13"; break;
+			case Symbol.EAN13: formatName = "EAN-13"; break;
 			/** ISBN-13 (from EAN-13). */
-			case Symbol.ISBN13: formatName = "ISBN13"; break;
+			case Symbol.ISBN13: formatName = "ISBN-13"; break;
 			/** Interleaved 2 of 5. */
-			case Symbol.I25: formatName = "I25"; break;
+			case Symbol.I25: formatName = "I2/5"; break;
 			/** DataBar (RSS-14). */
-			case Symbol.DATABAR: formatName = "DATABAR"; break;
+			case Symbol.DATABAR: formatName = "DataBar"; break;
 			/** DataBar Expanded. */
-			case Symbol.DATABAR_EXP: formatName = "DATABAR_EXP"; break;
+			case Symbol.DATABAR_EXP: formatName = "DataBar-Exp"; break;
 			/** Codabar. */
-			case Symbol.CODABAR: formatName = "CODABAR"; break;
+			case Symbol.CODABAR: formatName = "Codabar"; break;
 			/** Code 39. */
-			case Symbol.CODE39: formatName = "CODE39"; break;
+			case Symbol.CODE39: formatName = "CODE-39"; break;
 			/** PDF417. */
 			case Symbol.PDF417: formatName = "PDF417"; break;
 			/** QR Code. */
-			case Symbol.QRCODE: formatName = "QRCODE"; break;
+			case Symbol.QRCODE: formatName = "QR-Code"; break;
 			/** Code 93. */
-			case Symbol.CODE93: formatName = "CODE93"; break;
+			case Symbol.CODE93: formatName = "CODE-93"; break;
 			/** Code 128. */
-			case Symbol.CODE128: formatName = "CODE128"; break;
+			case Symbol.CODE128: formatName = "CODE-128"; break;
 
-			default: formatName = "NONE";
+			default: formatName = "UNKNOWN";
 		}
 		return formatName;
 	}

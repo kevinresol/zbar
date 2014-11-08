@@ -7,10 +7,11 @@ import neko.Lib;
 #end
 
 #if (android && openfl)
-import openfl.events.EventDispatcher;
 import openfl.utils.JNI;
 #end
 
+
+import openfl.events.EventDispatcher;
 
 
 class Zbar extends EventDispatcher
@@ -23,7 +24,13 @@ class Zbar extends EventDispatcher
 	private function new()
 	{
 		super();
+		#if ios
+		zbar_init(dispatch);
+		#end
+
+		#if android
 		zbar_init(this);
+		#end
 	}
 
 	public static function getInstance():Zbar
@@ -58,8 +65,13 @@ class Zbar extends EventDispatcher
 	}
 	
 	
-	//private static var zbar_sample_method = Lib.load ("zbar", "zbar_sample_method", 1);
-	
+	#if ios
+
+	private static var zbar_init = Lib.load ("zbar", "zbar_init", 1);
+	private static var zbar_start_scanning = Lib.load ("zbar", "zbar_start_scanning", 4);
+	private static var zbar_stop_scanning = Lib.load ("zbar", "zbar_stop_scanning", 0);
+	#end
+
 	#if (android && openfl)
 	private static var zbar_init = JNI.createStaticMethod (JAVA_CLASS_NAME, "init", "(Lorg/haxe/lime/HaxeObject;)V");
 	private static var zbar_start_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "startScanning", "(IIII)V");
