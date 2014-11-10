@@ -31,8 +31,8 @@ zbar.addScanner(0, 50, 400, 500); //x, y, width, height of the scanner view
 // the scanner automatically starts scanning, so no need to call startScanning here.
 
 // call zbar.stopScanning() if you want to stop the scanning
-// the viewfinder will freeze, call removeScanner to remove the viewfinder
+// the viewfinder will freeze, call zbar.removeScanner() to remove the viewfinder
 
-// call zbar.startScanning after stopScanning or after zbar has dispatched an event
+// call zbar.startScanning() after stopScanning or after zbar has dispatched an event
 
 ```
