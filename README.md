@@ -5,7 +5,7 @@ This native extension for OpenFL features a non-fullscreen barcode scanner, usin
 
 For android, it uses the [barcodescanner](https://github.com/dm77/barcodescanner) library by [dm77](https://github.com/dm77).
 
-For ios, it uses ZBar's iPhone SDK
+For ios, it uses [ZBar's iPhone SDK](http://sourceforge.net/projects/zbar/files/iPhoneSDK/ZBarSDK-1.2.dmg/download)
 
 The scanner viewfinder is presented as a separate native view over the view which draws the OpenFL stage. So there is a limitation that you cannot put any OpenFL display objects above the viewfinder.
 
