@@ -17,7 +17,7 @@ lime rebuild zbar ios
 
 Haxe:
 ```haxe
-var zbar = Zbar.getInstance();
+var zbar = ZBar.getInstance();
 zbar.addEventListener(ScanEvent.SUCCESS, function(e) 
 {	
 	trace (e.contents, e.formatName);
