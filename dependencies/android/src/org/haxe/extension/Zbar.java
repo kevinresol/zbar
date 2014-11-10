@@ -189,9 +189,6 @@ public class ZBar extends Extension implements ZBarScannerView.ResultHandler{
     public void handleResult(Result rawResult) {
         // Do something with the result here
         dispatchEvent(EVENT_SUCCESS, rawResult.getContents(), rawResult.getBarcodeFormat().getName());
-
-        //Log.v("ZBAR", rawResult.getContents()); // Prints scan results
-        //Log.v("ZBAR", rawResult.getBarcodeFormat().getName()); // Prints the scan format (qrcode, pdf417 etc.)
     }
 
 	/** A safe way to get an instance of the Camera object. */
