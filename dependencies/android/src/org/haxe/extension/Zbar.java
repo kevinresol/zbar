@@ -7,26 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Surface;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.AbsoluteLayout;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.util.Log;
 
-import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.AutoFocusCallback;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.Size;
-
-
 import me.dm7.barcodescanner.zbar.Result;
 import me.dm7.barcodescanner.zbar.ZBarScannerView;
 import me.dm7.barcodescanner.zbar.ZBarScannerView.ResultHandler;
-
 
 import org.haxe.lime.HaxeObject;
 
@@ -78,7 +67,7 @@ public class ZBar extends Extension implements ZBarScannerView.ResultHandler{
 		rect = new Rect();
 	}
 
-	public static void addScanner(final int x, final int y, final int width, final int height)
+	public static void addScanner(int x, int y, int width, int height)
 	{
 		rect.set(x, y, width, height);
 		Extension.mainActivity.runOnUiThread(addScannerRunnable);
