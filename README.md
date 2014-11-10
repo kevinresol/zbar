@@ -21,11 +21,13 @@ var zbar = ZBar.getInstance();
 zbar.addEventListener(ScanEvent.SUCCESS, function(e) 
 {	
 	trace (e.contents, e.formatName);
-	zbar.stopScanning();
 	zbar.removeScanner();
 });
 
 zbar.addScanner(0, 50, 400,500);
 zbar.startScanning();
+
+// call stopScanning if you want to stop after startScanning
+// zbar.stopScanning();
 
 ```
