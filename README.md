@@ -24,7 +24,7 @@ zbar.addEventListener(ScanEvent.SUCCESS, function(e)
 	zbar.removeScanner();
 });
 
-zbar.addScanner(0, 50, 400,500);
+zbar.addScanner(0, 50, 400, 500); //x, y, width, height of the scanner view
 zbar.startScanning();
 
 // call stopScanning if you want to stop after startScanning
