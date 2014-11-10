@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.res.AssetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.AbsoluteLayout;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.util.Log;
 
+import me.dm7.barcodescanner.core.CameraUtils;
 import me.dm7.barcodescanner.zbar.Result;
 import me.dm7.barcodescanner.zbar.ZBarScannerView;
 import me.dm7.barcodescanner.zbar.ZBarScannerView.ResultHandler;
@@ -71,7 +73,6 @@ public class ZBar extends Extension implements ZBarScannerView.ResultHandler{
 	{
 		rect.set(x, y, width, height);
 		Extension.mainActivity.runOnUiThread(addScannerRunnable);
-		startScanning();
 	}
 
 	public static void removeScanner()
@@ -177,7 +178,8 @@ public class ZBar extends Extension implements ZBarScannerView.ResultHandler{
 	@Override
     public void handleResult(Result rawResult) {
         // Do something with the result here
-        dispatchEvent(EVENT_SUCCESS, rawResult.getContents(), rawResult.getBarcodeFormat().getName());
+        if(rawResult != null)
+        	dispatchEvent(EVENT_SUCCESS, rawResult.getContents(), rawResult.getBarcodeFormat().getName());
     }
 
 	/** A safe way to get an instance of the Camera object. */
@@ -191,9 +193,30 @@ public class ZBar extends Extension implements ZBarScannerView.ResultHandler{
     private static Runnable addScannerRunnable = new Runnable(){
     	public void run() {
 			if(scannerViewAdded) return;
-			if(scannerView == null)
-			{
+			if(scannerView == null) {
 				scannerView = new ZBarScannerView(Extension.mainContext);
+				// start scanning
+				scannerView.setResultHandler(instance);
+				scannerView.startCamera();
+
+				// get camera preview size
+		        Camera.Size size = scannerView.getCamera().getParameters().getPreviewSize();
+		        double ratio = (double) size.width / size.height;
+
+		        int orientation = CameraUtils.getDisplayOrientation();
+		        if(orientation == 90 || orientation == 270)
+		        	ratio = 1 / ratio;
+
+		        if(rect.width == 0 && rect.height == 0) {
+		        	rect.width = size.width;
+		        	rect.height = size.height;
+		        } 
+		        else if (rect.width == 0) {
+		        	rect.width = (int) (rect.height * ratio);
+		        }
+		        else if (rect.height == 0) {
+		        	rect.height = (int) (rect.width / ratio);
+		        }
 
 				cameraLayout = new AbsoluteLayout(Extension.mainContext);
 		        cameraLayoutParams = new AbsoluteLayout.LayoutParams(rect.width, rect.height, rect.x, rect.y);

@@ -82,11 +82,11 @@ namespace zbar
 		    	UIViewController* topViewController = [[UIApplication sharedApplication] keyWindow].rootViewController;
 
 			    reader = [ZBarReaderViewController new];
+				reader.view.backgroundColor = [UIColor clearColor];
 			    reader.readerDelegate = [[ZBarReaderDelegate alloc] init];
 			    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
 			    reader.showsZBarControls = NO;
 				reader.readerView.frame = CGRectMake(x, y, width, height);
-				reader.view.backgroundColor = [UIColor clearColor];
 
 			    ZBarImageScanner* scanner = reader.scanner;
 			    // TODO: (optional) additional reader configuration here

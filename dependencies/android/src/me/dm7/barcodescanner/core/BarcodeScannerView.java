@@ -121,4 +121,8 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
             mPreview.setAutoFocus(state);
         }
     }
+
+    public Camera getCamera() {
+        return mCamera;
+    }
 }
