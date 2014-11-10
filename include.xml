@@ -2,6 +2,8 @@
 <project>
 	
 	<ndll name="zbar_haxe" />
+	<ndll name="iconv" if="android"/>
+	<ndll name="zbarjni" if="android" />
 	
 	<!-- Use the following for an Android Java extension, not needed otherwise -->
 	

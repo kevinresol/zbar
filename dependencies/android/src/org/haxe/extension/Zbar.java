@@ -162,12 +162,19 @@ public class Zbar extends Extension {
 	}
 
 	public static void stopScanning() {
-        camera.setPreviewCallback(null);
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-        cameraLayout.removeView(preview);
-        preview.destroy();
+		if(camera != null) {
+			Extension.mainActivity.runOnUiThread(new Runnable() {
+				public void run() {
+			        previewing = false;
+					camera.setPreviewCallback(null);
+			        camera.stopPreview();
+			        camera.release();
+			        camera = null;
+			        cameraLayout.removeView(preview);
+			        preview.destroy();
+				}
+			});
+		}
 	}
 	
 	
