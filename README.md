@@ -8,6 +8,14 @@ For ios, it uses ZBar's iPhone SDK
 
 ## Usage
 
+Command line:
+```
+haxelib git zbar https://github.com/kevinresol/zbar.git
+lime rebuild zbar android
+lime rebuild zbar ios
+```
+
+Haxe:
 ```haxe
 var zbar = Zbar.getInstance();
 zbar.addEventListener(ScanEvent.SUCCESS, function(e) 
