@@ -1,10 +1,10 @@
 # Zbar
 
-Haxe binding for the ZBar library
+Haxe binding for the [ZBar](http://sourceforge.net/projects/zbar/) library
 
 For android, it uses the [barcodescanner](https://github.com/dm77/barcodescanner) library by [dm77](https://github.com/dm77)
 
-For ios, it uses [ZBar](http://sourceforge.net/projects/zbar/)'s iPhone SDK
+For ios, it uses ZBar's iPhone SDK
 
 ## Usage
 
