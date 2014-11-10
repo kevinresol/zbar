@@ -1,12 +1,10 @@
 package;
 
-#if cpp
+#if ios
 import cpp.Lib;
-#elseif neko
-import neko.Lib;
 #end
 
-#if (android && openfl)
+#if android
 import openfl.utils.JNI;
 #end
 
@@ -14,12 +12,17 @@ import openfl.utils.JNI;
 import openfl.events.EventDispatcher;
 
 
-class Zbar extends EventDispatcher
+class ZBar extends EventDispatcher
 {
-	private static var instance:Zbar;
-	private static inline var JAVA_CLASS_NAME:String = "org.haxe.extension.Zbar";
+	private static var instance:ZBar;
 
-	public var scanning(default, null):Bool = false;
+	#if ios
+	private static inline var CPP_NAMESPACE:String = CPP_NAMESPACE;
+	#end
+
+	#if android
+	private static inline var JAVA_CLASS_NAME:String = "org.haxe.extension.ZBar";
+	#end
 	
 	private function new()
 	{
@@ -33,10 +36,10 @@ class Zbar extends EventDispatcher
 		#end
 	}
 
-	public static function getInstance():Zbar
+	public static function getInstance():ZBar
 	{
 		if(instance == null)
-			instance = new Zbar();
+			instance = new ZBar();
 
 		return instance;
 	}
@@ -53,21 +56,12 @@ class Zbar extends EventDispatcher
 
 	public function startScanning():Void
 	{
-		if(!scanning)
-		{
-			scanning = true;
-			zbar_start_scanning();
-		}
+		zbar_start_scanning();
 	}
 
 	public function stopScanning():Void
 	{
-		if(scanning)
-		{
-			scanning = false;
-			trace("stopscanning");
-			zbar_stop_scanning();
-		}
+		zbar_stop_scanning();
 	}
 
 	private function dispatch(type:String, contents:String, formatName:String)
@@ -77,17 +71,18 @@ class Zbar extends EventDispatcher
 	
 	
 	#if ios
-
-	private static var zbar_init = Lib.load ("zbar", "zbar_init", 1);
-	private static var zbar_add_scanner = Lib.load ("zbar", "zbar_add_scanner", 4);
-	private static var zbar_remove_scanner = Lib.load ("zbar", "zbar_remove_scanner", 0);
-	private static var zbar_start_scanning = Lib.load ("zbar", "zbar_start_scanning", 0);
-	private static var zbar_stop_scanning = Lib.load ("zbar", "zbar_stop_scanning", 0);
+	private static var zbar_init = Lib.load (CPP_NAMESPACE, "zbar_init", 1);
+	private static var zbar_add_scanner = Lib.load (CPP_NAMESPACE, "zbar_add_scanner", 4);
+	private static var zbar_remove_scanner = Lib.load (CPP_NAMESPACE, "zbar_remove_scanner", 0);
+	private static var zbar_start_scanning = Lib.load (CPP_NAMESPACE, "zbar_start_scanning", 0);
+	private static var zbar_stop_scanning = Lib.load (CPP_NAMESPACE, "zbar_stop_scanning", 0);
 	#end
 
-	#if (android && openfl)
+	#if android
 	private static var zbar_init = JNI.createStaticMethod (JAVA_CLASS_NAME, "init", "(Lorg/haxe/lime/HaxeObject;)V");
-	private static var zbar_start_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "startScanning", "(IIII)V");
+	private static var zbar_add_scanner = JNI.createStaticMethod (JAVA_CLASS_NAME, "addScanner", "(IIII)V");
+	private static var zbar_remove_scanner = JNI.createStaticMethod (JAVA_CLASS_NAME, "removeScanner", "()V");
+	private static var zbar_start_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "startScanning", "()V");
 	private static var zbar_stop_scanning = JNI.createStaticMethod (JAVA_CLASS_NAME, "stopScanning", "()V");
 	#end
 	

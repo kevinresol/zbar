@@ -8,7 +8,7 @@
 	<!-- Use the following for an Android Java extension, not needed otherwise -->
 	
 	<dependency name="zbar" path="dependencies/android" if="android" />
-	<android extension="org.haxe.extension.Zbar" />
+	<android extension="org.haxe.extension.ZBar" />
 
 
     <dependency name="iconv" if="ios" />
