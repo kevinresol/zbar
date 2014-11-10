@@ -22,13 +22,28 @@ static value zbar_init(value eventDispatcher) {
 DEFINE_PRIM (zbar_init, 1);
 
 
-static value zbar_start_scanning (value x, value y, value width, value height) {
+static value zbar_add_scanner (value x, value y, value width, value height) {
 	
-	startScanning(val_int(x), val_int(y), val_int(width), val_int(height));
+	addScanner(val_int(x), val_int(y), val_int(width), val_int(height));
 	return alloc_null();
 	
 }
-DEFINE_PRIM (zbar_start_scanning, 4);
+DEFINE_PRIM (zbar_add_scanner, 4);
+
+static value zbar_remove_scanner () {
+
+	removeScanner();
+	return alloc_null();
+}
+DEFINE_PRIM (zbar_remove_scanner, 0);
+
+static value zbar_start_scanning () {
+	
+	startScanning();
+	return alloc_null();
+	
+}
+DEFINE_PRIM (zbar_start_scanning, 0);
 
 static value zbar_stop_scanning () {
 

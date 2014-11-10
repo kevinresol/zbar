@@ -7,8 +7,10 @@ namespace zbar
     namespace iphone
     {
     	void initialize();
-        void startScanning(int x, int y, int width, int height);
-        void stopScanning();
+		void addScanner(int x, int y, int width, int height);
+		void removeScanner();
+		void startScanning();
+		void stopScanning();
     }
 }
 

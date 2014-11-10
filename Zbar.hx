@@ -41,12 +41,22 @@ class Zbar extends EventDispatcher
 		return instance;
 	}
 
-	public function startScanning(x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0):Void
+	public function addScanner(x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0):Void
+	{
+		zbar_add_scanner(x, y, width, height);
+	}
+
+	public function removeScanner():Void
+	{
+		zbar_remove_scanner();
+	}
+
+	public function startScanning():Void
 	{
 		if(!scanning)
 		{
 			scanning = true;
-			zbar_start_scanning(x, y, width, height);
+			zbar_start_scanning();
 		}
 	}
 
@@ -55,6 +65,7 @@ class Zbar extends EventDispatcher
 		if(scanning)
 		{
 			scanning = false;
+			trace("stopscanning");
 			zbar_stop_scanning();
 		}
 	}
@@ -68,7 +79,9 @@ class Zbar extends EventDispatcher
 	#if ios
 
 	private static var zbar_init = Lib.load ("zbar", "zbar_init", 1);
-	private static var zbar_start_scanning = Lib.load ("zbar", "zbar_start_scanning", 4);
+	private static var zbar_add_scanner = Lib.load ("zbar", "zbar_add_scanner", 4);
+	private static var zbar_remove_scanner = Lib.load ("zbar", "zbar_remove_scanner", 0);
+	private static var zbar_start_scanning = Lib.load ("zbar", "zbar_start_scanning", 0);
 	private static var zbar_stop_scanning = Lib.load ("zbar", "zbar_stop_scanning", 0);
 	#end
 

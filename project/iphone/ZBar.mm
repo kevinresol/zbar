@@ -19,9 +19,6 @@ static NSUInteger ApplicationSupportedInterfaceOrientationsForWindow(id self, SE
 // Delegate for notifications from the ZBar library.
 //
 @interface ZBarReaderDelegate : NSObject <ZBarReaderDelegate>
-{
-}
-- (void) dismissReader:(UIImagePickerController*)reader;
 @end
 
 @implementation ZBarReaderDelegate
@@ -39,9 +36,10 @@ static NSUInteger ApplicationSupportedInterfaceOrientationsForWindow(id self, SE
 
     // raise an OpenFL event BarcodeScannedEvent.BARCODE_SCANNED
     dispatchEvent("success", [symbol.data UTF8String], [symbol.typeName UTF8String]);
+    [((ZBarReaderViewController*) reader).readerView stop];
 
     // dismiss with a slight delay to avoid conflicting with the reader view still updating
-    [self performSelector:@selector(dismissReader:) withObject:reader afterDelay:1.0f];
+    //[self performSelector:@selector(dismissReader:) withObject:reader afterDelay:1.0f];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)reader
@@ -51,19 +49,10 @@ static NSUInteger ApplicationSupportedInterfaceOrientationsForWindow(id self, SE
     // raise an OpenFL event BarcodeScannedEvent.BARCODE_SCANNED
     dispatchEvent("cancelled", "", "");
 
-    [self dismissReader:reader];
+    [((ZBarReaderViewController*) reader).readerView stop];
+    //[self dismissReader:reader];
 }
 
-- (void) dismissReader:(UIImagePickerController*)reader
-{
-    // dismiss the controller (NB dismiss from the *reader*!)
-    ((ZBarReaderViewController*) reader).readerDelegate = nil;
-    //[reader dismissViewControllerAnimated:YES completion:nil];
-    [reader willMoveToParentViewController:nil];
-	[reader.view removeFromSuperview];
-	[reader removeFromParentViewController];
-    [self release];
-}
 @end
 
 
@@ -83,46 +72,66 @@ namespace zbar
                             "I@:@@");
         }
 
-		void startScanning (int x, int y, int width, int height)
+        void addScanner (int x, int y, int width, int height)
+        {
+        	NSLog(@"addScanner");
+        	// Present a barcode reader that scans from the camera feed
+        	if(!reader)
+		    {
+		    	NSLog(@"reader not yet exist");
+		    	UIViewController* topViewController = [[UIApplication sharedApplication] keyWindow].rootViewController;
+
+			    reader = [ZBarReaderViewController new];
+			    reader.readerDelegate = [[ZBarReaderDelegate alloc] init];
+			    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
+			    reader.showsZBarControls = NO;
+				reader.readerView.frame = CGRectMake(x, y, width, height);
+				reader.view.backgroundColor = [UIColor clearColor];
+
+			    ZBarImageScanner* scanner = reader.scanner;
+			    // TODO: (optional) additional reader configuration here
+			    // EXAMPLE: disable rarely used I2/5 to improve performance
+			    [scanner setSymbology: ZBAR_I25
+			             config: ZBAR_CFG_ENABLE
+			             to: 0];
+
+				// present and release the controller
+			    [topViewController addChildViewController:reader];
+			    [topViewController.view addSubview:reader.view];
+			    [reader didMoveToParentViewController:topViewController];
+			    //[topViewController presentViewController:reader animated:YES completion:nil];
+			
+			    [reader release];
+		    }
+        }
+
+        void removeScanner ()
+        {
+        	if(reader)
+			{
+				[reader.readerView stop];
+				[reader.readerDelegate release];
+				reader.readerDelegate = nil;
+				[reader willMoveToParentViewController:nil];
+				[reader.view removeFromSuperview];
+				[reader removeFromParentViewController];
+				reader = nil;
+			}
+        }
+
+		void startScanning ()
 		{
-			NSLog(@"startScanning");
-		    // Get our topmost view controller
-		    UIViewController* topViewController = [[UIApplication sharedApplication] keyWindow].rootViewController;
-
-		    // Present a barcode reader that scans from the camera feed
-		    reader = [ZBarReaderViewController new];
-		    reader.readerDelegate = [[ZBarReaderDelegate alloc] init];
-		    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
-		    reader.showsZBarControls = NO;
-			reader.readerView.frame = CGRectMake(x, y, width, height);
-			reader.view.backgroundColor = [UIColor clearColor];
-
-		    ZBarImageScanner* scanner = reader.scanner;
-		    // TODO: (optional) additional reader configuration here
-		    // EXAMPLE: disable rarely used I2/5 to improve performance
-		    [scanner setSymbology: ZBAR_I25
-		             config: ZBAR_CFG_ENABLE
-		             to: 0];
-
-		    // present and release the controller
-		    [topViewController addChildViewController:reader];
-		    [topViewController.view addSubview:reader.view];
-		    [reader didMoveToParentViewController:topViewController];
-		    //[topViewController presentViewController:reader animated:YES completion:nil];
-		    [reader release];
-
-
-		    //return true;
+			if(reader)
+			{
+				[reader.readerView start];
+			}
 		}
 
 		void stopScanning()
 		{
 			if(reader)
 			{
-				reader.readerDelegate = nil;
-				[reader willMoveToParentViewController:nil];
-				[reader.view removeFromSuperview];
-				[reader removeFromParentViewController];
+				[reader.readerView stop];
 			}
 		}
 	}
