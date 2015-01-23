@@ -7,7 +7,11 @@ For Android, it uses the [barcodescanner](https://github.com/dm77/barcodescanner
 
 For iOS, it uses [ZBar's iPhone SDK](http://sourceforge.net/projects/zbar/files/iPhoneSDK/ZBarSDK-1.2.dmg/download)
 
-The scanner viewfinder is presented as a separate native view over the view which draws the OpenFL stage. So there is a limitation that you cannot put any OpenFL display objects above the viewfinder.
+The scanner viewfinder is presented as a separate native view over the GL surface which draws the OpenFL stage. So there are some limitations:
+
+- the viewfinder is absolutely positioned
+- the viewfinder does not scale with the OpenFL stage
+- not possible to put any OpenFL display objects above the viewfinder
 
 ## Usage
 
